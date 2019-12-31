@@ -1,1 +1,3 @@
 PyMuPDF
+python-twitter
+python-dotenv

@@ -21,7 +21,14 @@ for book in bookFiles:
 
 print(bookPaths)
 
-bookToPrint = bookPaths[1]
+bookCount = len(bookPaths) - 1
+
+# randomBook = random.randint((0, len(bookPaths)))
+randomBook = random.randint(0, bookCount)
+
+
+# bookToPrint = bookPaths[1]
+bookToPrint = bookPaths[randomBook]
 
 book = fitz.open(bookToPrint)
 totalPages = book.pageCount
@@ -38,7 +45,13 @@ print(f"RANDOM: {randomPageNumber}")
 # pageNumber = 33
 pageNumber = randomPageNumber
 page = book.loadPage(pageNumber)
-picOfPage = page.getPixmap()
+
+# page resolution stuffs
+zoom = 2
+matrix = fitz.Matrix(zoom, zoom)
+# picOfPage = page.getPixmap()
+picOfPage = page.getPixmap(matrix=matrix)
+# page end
 output = f"{bookToPrint}-{pageNumber}.png"
 # print(doc)
 
