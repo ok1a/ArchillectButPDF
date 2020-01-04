@@ -1,6 +1,7 @@
 import fitz
 import os
 import random
+import asyncio
 from twbot import poststatus
 
 inputFormat = ".pdf"
@@ -25,41 +26,55 @@ for book in bookFiles:
 bookCount = len(bookPaths) - 1
 
 # randomBook = random.randint((0, len(bookPaths)))
-randomBook = random.randint(0, bookCount)
 
 
-# bookToPrint = bookPaths[1]
-bookToPrint = bookPaths[randomBook]
+async def runitup():
 
-book = fitz.open(bookToPrint)
-totalPages = book.pageCount
+    running = True
 
-# print(totalPages)
+    while running:
+        randomBook = random.randint(0, bookCount)
 
+        # bookToPrint = bookPaths[1]
+        bookToPrint = bookPaths[randomBook]
 
-# books that don't have valid table of contents page selection process
-randomPageNumber = random.randint(15, totalPages-8)
-print(f"RANDOM: {randomPageNumber}")
-# end
+        book = fitz.open(bookToPrint)
+        totalPages = book.pageCount
 
-# doc = book.getToC()
-# pageNumber = 33
-pageNumber = randomPageNumber
-page = book.loadPage(pageNumber)
+        # print(totalPages)
 
-# page resolution stuffs
-zoom = 2
-matrix = fitz.Matrix(zoom, zoom)
-# picOfPage = page.getPixmap()
-picOfPage = page.getPixmap(matrix=matrix)
-# page end
-output = f"{bookToPrint}-{pageNumber}.png"
-# print(doc)
+        # books that don't have valid table of contents page selection process
+        randomPageNumber = random.randint(15, totalPages-8)
+        print(f"RANDOM: {randomPageNumber}")
+        # end
 
-if os.path.isfile(output):
-    print("File already exists!")
-else:
-    print("Did not exist before. New upload!")
-    picOfPage.writePNG(output)
-    poststatus(str(pageNumber), output)
-    # poststatus(pageNumber, picOfPage.writePNG(output))
+        # doc = book.getToC()
+        # pageNumber = 33
+        pageNumber = randomPageNumber
+        page = book.loadPage(pageNumber)
+
+        # page resolution stuffs
+        zoom = 2
+        matrix = fitz.Matrix(zoom, zoom)
+        # picOfPage = page.getPixmap()
+        picOfPage = page.getPixmap(matrix=matrix)
+        # page end
+        output = f"{bookToPrint}-{pageNumber}.png"
+        # print(doc)
+
+        if os.path.isfile(output):
+            print("File already exists!")
+        else:
+            print("Did not exist before. New upload!")
+            picOfPage.writePNG(output)
+            poststatus(str(pageNumber), output)
+            # poststatus(pageNumber, picOfPage.writePNG(output))
+
+        minutes = 10
+
+        time = minutes * 60
+        print(f"Sleep for {minutes} minutes")
+
+        await asyncio.sleep(time)
+
+asyncio.run(runitup())
