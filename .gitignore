@@ -132,3 +132,4 @@ dmypy.json
 # imgs and pdfs
 *.pdf
 *.img
+*.png

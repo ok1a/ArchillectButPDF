@@ -1,6 +1,7 @@
 import fitz
 import os
 import random
+from twbot import poststatus
 
 inputFormat = ".pdf"
 outputFormat = ".png"
@@ -19,7 +20,7 @@ for book in bookFiles:
         bookPaths.append(full_path)
 
 
-print(bookPaths)
+# print(bookPaths)
 
 bookCount = len(bookPaths) - 1
 
@@ -60,3 +61,5 @@ if os.path.isfile(output):
 else:
     print("Did not exist before. New upload!")
     picOfPage.writePNG(output)
+    poststatus(str(pageNumber), output)
+    # poststatus(pageNumber, picOfPage.writePNG(output))
