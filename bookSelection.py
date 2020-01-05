@@ -70,7 +70,7 @@ async def runitup():
             poststatus(str(pageNumber), output)
             # poststatus(pageNumber, picOfPage.writePNG(output))
 
-        minutes = 10
+        minutes = 20
 
         time = minutes * 60
         print(f"Sleep for {minutes} minutes")
