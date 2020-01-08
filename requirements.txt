@@ -1,4 +1,4 @@
 PyMuPDF
-python-twitter
 python-dotenv
 tweepy
+colorama

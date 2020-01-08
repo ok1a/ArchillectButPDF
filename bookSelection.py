@@ -2,15 +2,16 @@ import fitz
 import os
 import random
 import asyncio
-from twbot import poststatus, poststatus2
+from twbot import poststatus
+from colorama import init as init_colorama, Fore, Back, Style
 from PIL import Image
+
+init_colorama(autoreset=True)
 
 inputFormat = ".pdf"
 outputFormat = ".png"
 path = './books'
 
-# for book in os.listdir('./books'):
-#     print(book)
 
 bookPaths = []
 
@@ -22,35 +23,25 @@ for book in bookFiles:
         bookPaths.append(full_path)
 
 
-# print(bookPaths)
-
 bookCount = len(bookPaths) - 1
 
-# randomBook = random.randint((0, len(bookPaths)))
 
-
-async def runitup():
+async def media_loop():
 
     running = True
 
     while running:
         randomBook = random.randint(0, bookCount)
 
-        # bookToPrint = bookPaths[1]
         bookToPrint = bookPaths[randomBook]
 
         book = fitz.open(bookToPrint)
         totalPages = book.pageCount
 
-        # print(totalPages)
-
         # books that don't have valid table of contents page selection process
         randomPageNumber = random.randint(15, totalPages-8)
-        print(f"RANDOM: {randomPageNumber}")
-        # end
 
         # doc = book.getToC()
-        # pageNumber = 33
         pageNumber = randomPageNumber
         page = book.loadPage(pageNumber)
 
@@ -61,40 +52,26 @@ async def runitup():
         picOfPage = page.getPixmap(matrix=matrix)
         # page end
         output = f"{bookToPrint}-{pageNumber}.png"
-        # print(doc)
 
         if os.path.isfile(output):
-            print("File already exists!")
-            print(f"Not printing: {output}")
+            print(f"{Fore.RED}\nCOLLISION:\nPage {pageNumber} of {bookToPrint}\n")
         else:
-            print("Did not exist before. New upload!")
-            print(f"Uploading: {output}")
-            # Works vv
+
             picOfPage.writePNG(output)
-            # poststatus(str(pageNumber), output)
-            # Works ^^
-            # pictura = picOfPage.writePNG(output)
-            # writtenfile = Image.open(output)
-            # print(writtenfile)
 
-            status = poststatus2(output)
+            status = poststatus(output)
             if status:
-                print(status.created_at)
+                print(
+                    f"{Fore.GREEN}\nSUCCESS\nUploaded: {output}\n")
+                # print(status.created_at)
             else:
-                print("Failure somewhere")
+                print(f"{Fore.RED}\nFailure updating status\n")
 
-            # poststatus2(pictura)
-            # poststatus2(picOfPage.writePNG(output))
-            # poststatus(output)
-            # poststatus(picOfPage.writePNG(output)
-            #            )
-            # poststatus(pageNumber, picOfPage.writePNG(output))
-
-        minutes = 2
+        minutes = 0.1
 
         time = minutes * 60
-        print(f"Sleep for {minutes} minutes")
+        print(f"{Fore.YELLOW}{Style.BRIGHT}Sleep for {minutes}m")
 
         await asyncio.sleep(time)
 
-asyncio.run(runitup())
+asyncio.run(media_loop())
