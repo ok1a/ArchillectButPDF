@@ -2,7 +2,8 @@ import fitz
 import os
 import random
 import asyncio
-from twbot import poststatus
+from twbot import poststatus, poststatus2
+from PIL import Image
 
 inputFormat = ".pdf"
 outputFormat = ".png"
@@ -64,13 +65,32 @@ async def runitup():
 
         if os.path.isfile(output):
             print("File already exists!")
+            print(f"Not printing: {output}")
         else:
             print("Did not exist before. New upload!")
+            print(f"Uploading: {output}")
+            # Works vv
             picOfPage.writePNG(output)
-            poststatus(str(pageNumber), output)
+            # poststatus(str(pageNumber), output)
+            # Works ^^
+            # pictura = picOfPage.writePNG(output)
+            # writtenfile = Image.open(output)
+            # print(writtenfile)
+
+            status = poststatus2(output)
+            if status:
+                print(status.created_at)
+            else:
+                print("Failure somewhere")
+
+            # poststatus2(pictura)
+            # poststatus2(picOfPage.writePNG(output))
+            # poststatus(output)
+            # poststatus(picOfPage.writePNG(output)
+            #            )
             # poststatus(pageNumber, picOfPage.writePNG(output))
 
-        minutes = 20
+        minutes = 2
 
         time = minutes * 60
         print(f"Sleep for {minutes} minutes")
