@@ -16,5 +16,7 @@ api = twitter.Api(consumer_key=consumer_key, consumer_secret=consumer_secret,
 # print(api.VerifyCredentials())
 
 
+# def poststatus(msg, picture):
+#     api.PostUpdate(status=msg, media=picture)
 def poststatus(msg, picture):
-    api.PostUpdate(status=msg, media=picture)
+    api.UploadMediaSimple(media=picture)
