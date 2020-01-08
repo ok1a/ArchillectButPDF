@@ -67,7 +67,7 @@ async def media_loop():
             else:
                 print(f"{Fore.RED}\nFailure updating status\n")
 
-        minutes = 0.1
+        minutes = 10
 
         time = minutes * 60
         print(f"{Fore.YELLOW}{Style.BRIGHT}Sleep for {minutes}m")
