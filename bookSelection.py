@@ -4,7 +4,6 @@ import random
 import asyncio
 from twbot import poststatus
 from colorama import init as init_colorama, Fore, Back, Style
-from PIL import Image
 
 init_colorama(autoreset=True)
 
@@ -67,7 +66,7 @@ async def media_loop():
             else:
                 print(f"{Fore.RED}\nFailure updating status\n")
 
-        minutes = 10
+        minutes = .1
 
         time = minutes * 60
         print(f"{Fore.YELLOW}{Style.BRIGHT}Sleep for {minutes}m")
