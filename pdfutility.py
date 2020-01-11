@@ -133,6 +133,12 @@ async def media_loop():
         else:
             print(f"{Fore.RED}\nFailure updating status\n")
 
+        try:
+            os.remove(output)
+            print("File removed succesfully")
+        except OSError as e:
+            print(f"Error removing file: {e}")
+
         print(f"{Fore.BLUE} VALID EVERYTHING")
 
         minutes = .01
