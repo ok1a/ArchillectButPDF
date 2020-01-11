@@ -2,6 +2,8 @@ import fitz
 import os
 import random
 import asyncio
+import json
+import pickle
 from twbot import poststatus
 from colorama import init as init_colorama, Fore, Back, Style
 
@@ -18,6 +20,34 @@ session_counter = 0
 bookPaths = []
 
 bookFiles = os.listdir(path)
+
+
+with open('ex_pick.pickle', 'rb') as handle:
+    book_history = pickle.load(handle)
+
+print(book_history)
+
+
+def book_in_history(book, page):
+    if book in book_history:
+        print("Book is in history")
+        if page in book_history[book]:
+            print("Page is in history. Collision.")
+            return False
+        else:
+            book_history[book][page] = 1
+    else:
+        print("Book not in history yet.")
+        book_history[book] = {}
+        print("Book now in history")
+        book_history[book][page] = 1
+        print("Page is now in book")
+
+    with open('ex_pick.pickle', 'wb') as handle:
+        pickle.dump(book_history, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    return True
+
 
 for book in bookFiles:
     if (book[-4:] == inputFormat):
@@ -83,9 +113,12 @@ async def media_loop():
                 picOfPage = page.getPixmap(matrix=matrix)
                 output = f"{bookToPrint}-{pageNumber}.png"
 
-                if os.path.isfile(output):
+                if not book_in_history(bookToPrint, pageNumber):
                     print(
                         f"{Fore.RED}\nCOLLISION:\nPage {pageNumber} of {bookToPrint}\n")
+                # if os.path.isfile(output):
+                #     print(
+                #         f"{Fore.RED}\nCOLLISION:\nPage {pageNumber} of {bookToPrint}\n")
                 else:
                     originalBookAndPage = True
             except:
