@@ -133,3 +133,8 @@ dmypy.json
 *.pdf
 *.img
 *.png
+
+# maintenance files
+lib_history2.pickle.json
+lib_history2.pickle
+picklegen.py

@@ -1,166 +1,147 @@
-import json
+import fitz
+import os
+import random
+import asyncio
 import pickle
+from mediaworker import poststatus
+from colorama import init as init_colorama, Fore, Back, Style
 
 
-class BookWorker:
-    def __init__(self):
-        pass
+init_colorama(autoreset=True)
+
+inputFormat = ".pdf"
+outputFormat = ".png"
+path = './books'
 
 
-# library = {
-#     "book1" = {
-#         # pages : times uploaded
-#         10: 1,
-#         2: 1,
-#         1: 1
-#     },
-#     "book2" = {
-#         25: 1,
-#         3: 20,
-#         1: 1
-#     }
-# }
+session_counter = 0
 
-library = {
-    "book1": {
-        217: 1,
-        10: 2,
-        3: 1,
-        128: 1,
-        384: 2
-    },
-    "book2": {
-        182: 2,
-        2: 1,
-        38: 2,
-        22: 1,
-        387: 2,
-        92: 2,
-        48: 1
-    }
-}
+bookPaths = []
 
-# with open('ex_pick.pickle', 'wb') as handle:
-#     pickle.dump(library, handle, protocol=pickle.HIGHEST_PROTOCOL)
+bookFiles = os.listdir(path)
 
-with open('ex_pick.pickle', 'rb') as handle:
-    b = pickle.load(handle)
 
-print(b)
-print(library == b)
+with open('lib_history.pickle', 'rb') as handle:
+    book_history = pickle.load(handle)
 
-book = 'book3'
-page = '2'
-# if b.has_key(book):
-#     print("Book is here")
-#     print(b[book])
+# print(book_history)
 
-# else:
-#     print("No book")
-#     # print(b[book])
 
-if book in b:
-    print("Key here")
-    if page in b[book]:
-        print("Page here. Collide")
+def book_in_history(book, page):
+    if book in book_history:
+        # print("Book is in history")
+        if page in book_history[book]:
+            print("Page is in history. Collision.")
+            return False
+        else:
+            book_history[book][page] = 1
     else:
-        b[book][page] = 1
-else:
-    print("Key not here")
-    b[book] = {}
-    print("Now it is")
-    b[book][page] = 1
-    print("page too")
+        # print("Book not in history yet.")
+        book_history[book] = {}
+        # print("Book now in history")
+        book_history[book][page] = 1
+        # print("Page is now in book")
 
-print(b)
+    with open('lib_history.pickle', 'wb') as handle:
+        pickle.dump(book_history, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    return True
 
 
-with open('ex_pick.pickle', 'wb') as handle:
-    pickle.dump(b, handle, protocol=pickle.HIGHEST_PROTOCOL)
+for book in bookFiles:
+    if (book[-4:] == inputFormat):
+        full_path = os.path.join(path, book)
+        bookPaths.append(full_path)
 
-print("Saved")
 
-# print(b.keys())
+bookCount = len(bookPaths) - 1
 
-# print(b.has_key('book1'))
-library2 = {
-    "book8484": {
-        217: 1,
-        10: 2,
-        3: 1,
-        128: 1,
-        384: 2
-    },
-    "book2": {
-        182: 2,
-        2: 1,
-        38: 2,
-        22: 1,
-        387: 2,
-        92: 2,
-        48: 1
-    }
-}
 
-# library3 = {library2}
-# print(library3)
+async def media_loop():
 
-# with open("ex_play.json", "w") as write_file:
-#     json.dump(library3, write_file)
+    running = True
 
-# json_string = json.dumps(library2)
-# print(json_string)
+    while running:
 
-# with open("lib_store_ex.json", "r") as read_file:
-#     data = json.load(read_file)
+        originalBookAndPage = False
+        while not originalBookAndPage:
 
-# # print(data)
+            validBookAndPageOpened = False
+            while not validBookAndPageOpened:
 
-# libraryHT = data['library']
+                validBookFound = False
+                while not validBookFound:
+                    randomBook = random.randint(0, bookCount)
 
-# # print(data['library'])
-# # print(libraryHT)
+                    bookToPrint = bookPaths[randomBook]
+                    print(f"Book selected: {bookToPrint}")
 
-# randBook = 'example-book-44'
-# randNum = '4'
+                    try:
+                        book = fitz.open(bookToPrint)
+                        totalPages = book.pageCount
+                        print(f"Book loaded. Page count: {totalPages}")
+                        validBookFound = True
+                    except RuntimeError as e:
+                        print(f"Error with book somewhere. {e}")
 
-# # if (libraryHT[randBook]):
-# #     print("Yes")
-# #     # print(libraryHT[randBook])
-# #     # if libraryHT[randBook][str(randNum)]:
-# #     if not libraryHT[randBook][randNum]:
-# #         print("nope. not posted.")
-# #     else:
-# #         print("Already posted once")
-# # else:
-# #     libraryHT[randBook] = {
-# #         randNum: 1
-# #     }
+                # books that don't have valid table of contents page selection process
+                randomLow = int(totalPages * 0.04)
 
-# # print(libraryHT)
-# if not (data['library'][randBook]):
-#     print("no")
-#     # print(libraryHT[randBook])
-#     # if libraryHT[randBook][str(randNum)]:
-#     if not (data['library'][randBook][randNum]):
-#         print("Already posted once")
-#     else:
-#         print("nope. not posted.")
-# else:
-#     data['library'][randBook] = {
-#         randNum: 1
-#     }
+                # randomPageNumber = random.randint(randomLow, totalPages - 8)
+                randomPageNumber = random.randint(
+                    randomLow, totalPages - randomLow)
 
-# print(data['library'])
+                if randomPageNumber == 0:
+                    randomPageNumber = 1
 
-# print(library)
-# print(library["book1"])
-# # print(library['book3'])
-# library['book3'] = {}
-# print(library['book3'])
-# # print(library['book3'][393])
-# library['book3'][393] = 1
-# library['book3'][393] = library['book3'][393] + 1
-# print(library['book3'][393])
+                pageNumber = randomPageNumber
+                try:
+                    page = book.loadPage(pageNumber)
+                    print(f"Page loaded: {pageNumber}")
+                    validBookAndPageOpened = True
+                except RuntimeError as e:
+                    print(f"Error loading page: {pageNumber}. {e}")
 
-# Doing a nested hash table will also allow me to store upload counts which I can use to implement a recycling content policy based on a config.json or something. "max_times_allowed_dupe_content". same pic, twice max. no more.
+            try:
+                zoom = 2
+                matrix = fitz.Matrix(zoom, zoom)
+                picOfPage = page.getPixmap(matrix=matrix)
+                output = f"{bookToPrint}-{pageNumber}.png"
+
+                if not book_in_history(bookToPrint, pageNumber):
+                    print(
+                        f"{Fore.RED}\nCOLLISION:\nPage {pageNumber} of {bookToPrint}\n")
+                # if os.path.isfile(output):
+                #     print(
+                #         f"{Fore.RED}\nCOLLISION:\nPage {pageNumber} of {bookToPrint}\n")
+                else:
+                    originalBookAndPage = True
+            except:
+                print(f"{Fore.RED}: Error in checking for collision")
+
+        picOfPage.writePNG(output)
+        status = poststatus(output)
+        if status:
+            print(
+                f"{Fore.GREEN}\nSUCCESS\nUploaded: {output}\n")
+
+            try:
+                os.remove(output)
+                print("File removed succesfully")
+            except OSError as e:
+                print(f"Error removing file: {e}")
+            # print(status.created_at)
+        else:
+            print(f"{Fore.RED}\nFailure updating status\n")
+
+        print(f"{Fore.BLUE} VALID EVERYTHING")
+
+        minutes = 5
+
+        time = minutes * 60
+        print(f"{Fore.YELLOW}{Style.BRIGHT}Sleep for {minutes}m")
+
+        await asyncio.sleep(time)
+
+
+asyncio.run(media_loop())
