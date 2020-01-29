@@ -1,4 +1,6 @@
-PyMuPDF
 python-dotenv
 tweepy
 colorama
+pillow
+pypdf2
+pdf2image
