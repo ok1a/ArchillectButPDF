@@ -1,12 +1,12 @@
+import fitz
 import os
 import random
 import asyncio
 import pickle
 from mediaworker import poststatus
 from colorama import init as init_colorama, Fore, Back, Style
-from PyPDF2 import PdfFileReader, PdfFileWriter
-from PIL import Image
-import pdf2image
+
+
 init_colorama(autoreset=True)
 
 inputFormat = ".pdf"
@@ -77,8 +77,8 @@ async def media_loop():
                     print(f"Book selected: {bookToPrint}")
 
                     try:
-                        book = PdfFileReader(bookToPrint)           #this is the new change
-                        totalPages = book.getNumPages()             #this is also a new change
+                        book = fitz.open(bookToPrint)
+                        totalPages = book.pageCount
                         print(f"Book loaded. Page count: {totalPages}")
                         validBookFound = True
                     except RuntimeError as e:
@@ -96,35 +96,30 @@ async def media_loop():
 
                 pageNumber = randomPageNumber
                 try:
-                    page = book.getPage(pageNumber)
+                    page = book.loadPage(pageNumber)
                     print(f"Page loaded: {pageNumber}")
                     validBookAndPageOpened = True
                 except RuntimeError as e:
                     print(f"Error loading page: {pageNumber}. {e}")
 
-#            try:
-            writer = PdfFileWriter() #added these two
-            writer.addPage(page) #added this one too
-            zoom = 2
-            #matrix = writer.zoom(zoom)            #new change here thank me later
-            with open('outfile.pdf', 'wb') as outfile: #had to add this
-                writer.write(outfile)
+            try:
+                zoom = 2
+                matrix = fitz.Matrix(zoom, zoom)
+                picOfPage = page.getPixmap(matrix=matrix)
+                output = f"{bookToPrint}-{pageNumber}.png"
 
-            picOfPage = pdf2image.convert_from_path('./outfile.pdf') #i changed this too
-            output = f"{bookToPrint}-{pageNumber}.png"
-
-            if not book_in_history(bookToPrint, pageNumber):
-                print(
-                    f"{Fore.RED}\nCOLLISION:\nPage {pageNumber} of {bookToPrint}\n")
+                if not book_in_history(bookToPrint, pageNumber):
+                    print(
+                        f"{Fore.RED}\nCOLLISION:\nPage {pageNumber} of {bookToPrint}\n")
                 # if os.path.isfile(output):
                 #     print(
                 #         f"{Fore.RED}\nCOLLISION:\nPage {pageNumber} of {bookToPrint}\n")
-            else:
-                originalBookAndPage = True
-            #except:
-                #print(f"{Fore.RED}: Error in checking for collision")
+                else:
+                    originalBookAndPage = True
+            except:
+                print(f"{Fore.RED}: Error in checking for collision")
 
-        picOfPage[0].save(output) ##had to add this
+        picOfPage.writePNG(output)
         status = poststatus(output)
         if status:
             print(
@@ -141,7 +136,7 @@ async def media_loop():
 
         print(f"{Fore.BLUE} VALID EVERYTHING")
 
-        minutes = 15
+        minutes = 5
 
         time = minutes * 60
         print(f"{Fore.YELLOW}{Style.BRIGHT}Sleep for {minutes}m")
